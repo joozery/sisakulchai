@@ -1,14 +1,79 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
-		<meta name="generator" content="Hostinger Horizons" />
+		<link rel="icon" type="image/png" href="/assets/logo.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hostinger Horizons</title>
+		<meta name="description" content="SCC - จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง คุณภาพดี ราคาเหมาะสม พร้อมบริการหลังการขาย" />
+		<meta name="keywords" content="สีทาบ้าน, สีรถยนต์, สีทอง, สีคุณภาพ, SCC, วัสดุก่อสร้าง" />
+		<meta name="author" content="SCC Paint Store" />
+		<meta name="robots" content="index, follow" />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://scc-paint.com/" />
+		<meta property="og:title" content="SCC - จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง" />
+		<meta property="og:description" content="จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง คุณภาพดี ราคาเหมาะสม พร้อมบริการหลังการขาย" />
+		<meta property="og:image" content="/assets/logo.png" />
+		<meta property="og:locale" content="th_TH" />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://scc-paint.com/" />
+		<meta property="twitter:title" content="SCC - จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง" />
+		<meta property="twitter:description" content="จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง คุณภาพดี ราคาเหมาะสม พร้อมบริการหลังการขาย" />
+		<meta property="twitter:image" content="/assets/logo.png" />
+		
+		<!-- Theme Color -->
+		<meta name="theme-color" content="#10b981" />
+		<meta name="msapplication-TileColor" content="#10b981" />
+		
+		<!-- Preload Critical Resources -->
+		<link rel="preload" href="/assets/logo.png" as="image" />
+		<link rel="preload" href="/src/main.jsx" as="script" />
+		
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+		
+		<title>SCC - จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง</title>
+		
+		<!-- Structured Data -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Store",
+			"name": "SCC Paint Store",
+			"description": "จำหน่ายสีทาบ้าน สีรถยนต์ สีทอง คุณภาพดี ราคาเหมาะสม",
+			"url": "https://scc-paint.com",
+			"logo": "https://scc-paint.com/assets/logo.png",
+			"address": {
+				"@type": "PostalAddress",
+				"addressCountry": "TH",
+				"addressLocality": "ประเทศไทย"
+			},
+			"contactPoint": {
+				"@type": "ContactPoint",
+				"telephone": "+66-000-000-0000",
+				"contactType": "customer service"
+			}
+		}
+		</script>
 	</head>
 	<body>
 		<div id="root"></div>
 		<script type="module" src="/src/main.jsx"></script>
+		
+		<!-- Performance Monitoring -->
+		<script>
+			// Basic performance monitoring
+			window.addEventListener('load', function() {
+				if ('performance' in window) {
+					const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+					console.log('Page load time:', loadTime + 'ms');
+				}
+			});
+		</script>
 	</body>
 </html>

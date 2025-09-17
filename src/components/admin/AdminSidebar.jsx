@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSidebar } from '@/layouts/AdminLayout';
 import { 
   Home, 
   Package, 
@@ -69,7 +70,7 @@ const navigationGroups = [
 ];
 
 const AdminSidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isSidebarCollapsed: isCollapsed, toggleSidebar } = useSidebar();
 
   return (
     <aside className={`hidden md:flex flex-col h-screen bg-gradient-to-b from-background to-muted/20 border-r border-border/50 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
@@ -114,7 +115,7 @@ const AdminSidebar = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={toggleSidebar}
           className="h-8 w-8 p-0 hover:bg-primary/10"
         >
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
