@@ -55,8 +55,8 @@ const AdminHeader = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <a href="/admin/profile">โปรไฟล์</a>
+          <DropdownMenuItem onClick={() => navigate('/admin/profile')}>
+            โปรไฟล์
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:bg-red-50 focus:text-red-600">

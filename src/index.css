@@ -20,6 +20,46 @@
   background-color: rgba(37,195,129,0.35);
 }
 
+/* Professional Sidebar Scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(156, 163, 175, 0.2) 0%, rgba(156, 163, 175, 0.4) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(156, 163, 175, 0.4) 0%, rgba(156, 163, 175, 0.6) 100%);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(156, 163, 175, 0.6) 0%, rgba(156, 163, 175, 0.8) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.sidebar-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+}
+
+/* Smooth scrolling */
+.sidebar-scroll {
+  scroll-behavior: smooth;
+}
+
 /* Hide horizontal scrollbar for category slider and similar rows */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -27,6 +67,41 @@
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none;    /* Firefox */
+}
+
+/* SweetAlert2 Custom Styles */
+.swal-popup-custom {
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.swal-title-custom {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #1f2937 !important;
+}
+
+.swal-content-custom {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 1rem !important;
+  color: #6b7280 !important;
+  line-height: 1.6 !important;
+}
+
+.swal2-confirm {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 12px 24px !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.swal2-confirm:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .admin-card {

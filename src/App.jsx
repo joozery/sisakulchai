@@ -29,8 +29,10 @@ import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminOrders from '@/pages/admin/AdminOrders';
 import AdminBanners from '@/pages/admin/AdminBanners';
 import AdminHeroSlides from '@/pages/admin/AdminHeroSlides';
+import AdminPromotions from '@/pages/admin/AdminPromotions';
 import AdminBlog from '@/pages/admin/AdminBlog';
 import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminCustomers from '@/pages/admin/AdminCustomers';
 import AdminProfile from '@/pages/admin/AdminProfile';
 import AdminReviews from '@/pages/admin/AdminReviews';
 import AdminPayment from '@/pages/admin/AdminPayment';
@@ -96,9 +98,11 @@ function App() {
                           <Route path="/orders" element={<AdminOrders />} />
                           <Route path="/banners" element={<AdminBanners />} />
                           <Route path="/hero-slides" element={<AdminHeroSlides />} />
+                          <Route path="/promotions" element={<AdminPromotions />} />
                           <Route path="/blog" element={<AdminBlog />} />
                           <Route path="/profile" element={<AdminProfile />} />
                           <Route path="/users" element={<AdminUsers />} />
+                          <Route path="/customers" element={<AdminCustomers />} />
                           <Route path="/reviews" element={<AdminReviews />} />
                           <Route path="/payment" element={<AdminPayment />} />
                         </Routes>
