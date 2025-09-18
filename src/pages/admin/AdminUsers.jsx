@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import ReactLoading from 'react-loading';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { 
@@ -45,45 +46,9 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import Swal from 'sweetalert2';
+import { api } from '@/lib/api';
 
-const initialUsers = [
-  { 
-    id: 1, 
-    name: 'Admin User', 
-    email: 'admin@scc.com', 
-    phone: '081-234-5678',
-    role: 'admin', 
-    status: 'active',
-    joinDate: '2024-01-01',
-    lastLogin: '2024-01-15',
-    address: 'กรุงเทพมหานคร',
-    totalOrders: 0
-  },
-  { 
-    id: 2, 
-    name: 'สมชาย ใจดี', 
-    email: 'somchai@example.com', 
-    phone: '082-345-6789',
-    role: 'customer', 
-    status: 'active',
-    joinDate: '2024-01-05',
-    lastLogin: '2024-01-14',
-    address: 'เชียงใหม่',
-    totalOrders: 5
-  },
-  { 
-    id: 3, 
-    name: 'สุดา รักดี', 
-    email: 'suda@example.com', 
-    phone: '083-456-7890',
-    role: 'customer', 
-    status: 'banned',
-    joinDate: '2024-01-10',
-    lastLogin: '2024-01-12',
-    address: 'ภูเก็ต',
-    totalOrders: 2
-  },
-];
+const initialUsers = [];
 
 const AdminUsers = () => {
   const { toast } = useToast();
@@ -91,32 +56,33 @@ const AdminUsers = () => {
   const [query, setQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    role: 'customer',
+    role: 'staff',
     status: 'active',
-    address: ''
+    address: '',
+    password: '',
+    confirmPassword: ''
   });
 
-  // Load users from localStorage
-  useEffect(() => {
-    const savedUsers = localStorage.getItem('scc_users');
-    if (savedUsers) {
-      try {
-        setUsers(JSON.parse(savedUsers));
-      } catch (error) {
-        console.error('Error loading users:', error);
-      }
+  // Load users from API (only admin/staff)
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await api.get('/api/admin/users');
+      if (data?.ok) setUsers(data.users || []);
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'โหลดผู้ใช้ล้มเหลว', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-
-  // Save users to localStorage
-  const saveUsers = (newUsers) => {
-    setUsers(newUsers);
-    localStorage.setItem('scc_users', JSON.stringify(newUsers));
   };
+
+  useEffect(() => { loadUsers(); }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -130,9 +96,9 @@ const AdminUsers = () => {
     );
   }, [users, query]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.email) {
       toast({
         title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
@@ -142,32 +108,87 @@ const AdminUsers = () => {
       return;
     }
 
-    const userData = {
-      ...formData,
-      id: editingUser ? editingUser.id : Date.now(),
-      joinDate: editingUser ? editingUser.joinDate : new Date().toISOString().split('T')[0],
-      lastLogin: editingUser ? editingUser.lastLogin : new Date().toISOString().split('T')[0],
-      totalOrders: editingUser ? editingUser.totalOrders : 0
-    };
-
-    let newUsers;
-    if (editingUser) {
-      newUsers = users.map(u => u.id === editingUser.id ? userData : u);
-      toast({
-        title: 'อัปเดตผู้ใช้สำเร็จ',
-        description: 'ข้อมูลผู้ใช้ได้รับการอัปเดตแล้ว',
-      });
+    // Password validations
+    if (!editingUser) {
+      if (formData.password && formData.password.length < 8) {
+        toast({ title: 'รหัสผ่านต้องอย่างน้อย 8 ตัวอักษร', variant: 'destructive' });
+        return;
+      }
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        toast({ title: 'รหัสผ่านไม่ตรงกัน', variant: 'destructive' });
+        return;
+      }
     } else {
-      newUsers = [...users, userData];
-      toast({
-        title: 'เพิ่มผู้ใช้สำเร็จ',
-        description: 'ผู้ใช้ใหม่ถูกเพิ่มเข้าสู่ระบบแล้ว',
-      });
+      if (formData.password) {
+        if (formData.password.length < 8) {
+          toast({ title: 'รหัสผ่านใหม่ต้องอย่างน้อย 8 ตัวอักษร', variant: 'destructive' });
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          toast({ title: 'รหัสผ่านใหม่ไม่ตรงกัน', variant: 'destructive' });
+          return;
+        }
+      }
     }
 
-    saveUsers(newUsers);
-    resetForm();
-    setIsDialogOpen(false);
+    try {
+      if (editingUser) {
+        await api.patch(`/api/admin/users/${editingUser.id}`, {
+          name: formData.name,
+          phone: formData.phone || null,
+          role: formData.role,
+          status: formData.status,
+          address: formData.address || null,
+          ...(formData.password ? { password: formData.password } : {}),
+        });
+        toast({ title: 'อัปเดตผู้ใช้สำเร็จ' });
+      } else {
+        const password = formData.password || (Math.random().toString(36).slice(-10) + '!');
+        await api.post('/api/admin/users', {
+          name: formData.name,
+          email: formData.email,
+          password,
+          phone: formData.phone || null,
+          role: formData.role,
+          status: formData.status,
+          address: formData.address || null,
+        });
+        await Swal.fire({
+          title: 'เพิ่มผู้ใช้สำเร็จ',
+          html: `
+            <div style="text-align:left;font-size:14px;line-height:1.6">
+              <div><strong>ชื่อ:</strong> ${formData.name}</div>
+              <div><strong>อีเมล:</strong> ${formData.email}</div>
+              <div style="margin-top:8px;padding:10px;border:1px dashed #ddd;border-radius:8px;background:#fafafa">
+                <div style="font-size:12px;color:#666;margin-bottom:6px">รหัสผ่านชั่วคราว</div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <code id="tmp-pass" style="padding:4px 8px;background:#fff;border:1px solid #eee;border-radius:6px">${password}</code>
+                  <button id="copy-pass" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#f3f4f6;cursor:pointer">คัดลอก</button>
+                </div>
+              </div>
+              <div style="margin-top:10px;color:#64748b;font-size:12px">กรุณาส่งรหัสนี้ให้ผู้ใช้ และแนะนำให้เปลี่ยนรหัสผ่านทันทีหลังเข้าสู่ระบบ</div>
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: false,
+          confirmButtonText: 'ปิด',
+          didOpen: () => {
+            const btn = document.getElementById('copy-pass');
+            if (btn) {
+              btn.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(password); btn.textContent = 'คัดลอกแล้ว'; } catch {}
+              });
+            }
+          }
+        });
+      }
+      resetForm();
+      setIsDialogOpen(false);
+      loadUsers();
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'บันทึกไม่สำเร็จ', variant: 'destructive' });
+    }
   };
 
   const handleEdit = (user) => {
@@ -178,7 +199,9 @@ const AdminUsers = () => {
       phone: user.phone || '',
       role: user.role,
       status: user.status,
-      address: user.address || ''
+      address: user.address || '',
+      password: '',
+      confirmPassword: ''
     });
     setIsDialogOpen(true);
   };
@@ -201,12 +224,13 @@ const AdminUsers = () => {
     });
 
     if (result.isConfirmed) {
-      const newUsers = users.filter(u => u.id !== user.id);
-      saveUsers(newUsers);
-      toast({
-        title: 'ลบผู้ใช้สำเร็จ',
-        description: 'ผู้ใช้ถูกลบออกจากระบบแล้ว',
-      });
+      try {
+        await api.delete(`/api/admin/users/${user.id}`);
+        toast({ title: 'ลบผู้ใช้สำเร็จ' });
+        loadUsers();
+      } catch (e) {
+        toast({ title: 'ลบไม่สำเร็จ', variant: 'destructive' });
+      }
     }
   };
 
@@ -229,12 +253,13 @@ const AdminUsers = () => {
     });
 
     if (result.isConfirmed) {
-      const newUsers = users.map(u => u.id === user.id ? { ...u, role: newRole } : u);
-      saveUsers(newUsers);
-      toast({
-        title: 'เปลี่ยนสิทธิ์สำเร็จ',
-        description: `สิทธิ์ของ "${user.name}" ถูกเปลี่ยนเป็น ${newRole === 'admin' ? 'ผู้ดูแลระบบ' : 'ลูกค้า'} แล้ว`,
-      });
+      try {
+        await api.patch(`/api/admin/users/${user.id}`, { role: newRole });
+        toast({ title: 'เปลี่ยนสิทธิ์สำเร็จ' });
+        loadUsers();
+      } catch (e) {
+        toast({ title: 'เปลี่ยนสิทธิ์ไม่สำเร็จ', variant: 'destructive' });
+      }
     }
   };
 
@@ -257,12 +282,13 @@ const AdminUsers = () => {
     });
 
     if (result.isConfirmed) {
-      const newUsers = users.map(u => u.id === user.id ? { ...u, status: newStatus } : u);
-      saveUsers(newUsers);
-      toast({
-        title: newStatus === 'banned' ? 'ระงับผู้ใช้สำเร็จ' : 'เปิดใช้งานผู้ใช้สำเร็จ',
-        description: `ผู้ใช้ "${user.name}" ${newStatus === 'banned' ? 'ถูกระงับ' : 'ถูกเปิดใช้งาน'} แล้ว`,
-      });
+      try {
+        await api.patch(`/api/admin/users/${user.id}`, { status: newStatus });
+        toast({ title: newStatus === 'banned' ? 'ระงับผู้ใช้สำเร็จ' : 'เปิดใช้งานผู้ใช้สำเร็จ' });
+        loadUsers();
+      } catch (e) {
+        toast({ title: 'อัปเดตสถานะไม่สำเร็จ', variant: 'destructive' });
+      }
     }
   };
 
@@ -271,9 +297,11 @@ const AdminUsers = () => {
       name: '',
       email: '',
       phone: '',
-      role: 'customer',
+      role: 'staff',
       status: 'active',
-      address: ''
+      address: '',
+      password: '',
+      confirmPassword: ''
     });
     setEditingUser(null);
   };
@@ -403,6 +431,30 @@ const AdminUsers = () => {
                   </Select>
                 </div>
 
+                {/* Password fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">{editingUser ? 'ตั้งรหัสใหม่ (ไม่บังคับ)' : 'รหัสผ่าน'}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder={editingUser ? 'ใส่เฉพาะกรณีต้องการเปลี่ยน' : 'อย่างน้อย 8 ตัวอักษร (เว้นว่างให้ระบบสุ่ม)'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">ยืนยันรหัสผ่าน</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      placeholder="พิมพ์รหัสผ่านซ้ำ"
+                    />
+                  </div>
+                </div>
+
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     ยกเลิก
@@ -483,7 +535,12 @@ const AdminUsers = () => {
               </div>
             </div>
             
-            {filtered.length === 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <ReactLoading type="spin" color="#10b981" height={36} width={36} />
+                <span className="ml-3 text-sm text-muted-foreground">กำลังโหลดข้อมูลผู้ใช้...</span>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h3 className="mt-2 text-sm font-semibold text-gray-900">ไม่พบผู้ใช้</h3>

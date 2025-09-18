@@ -38,9 +38,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import Swal from 'sweetalert2';
+import { api } from '@/lib/api';
+import { useAdmin } from '@/contexts/AdminContext';
 
 const AdminProfile = () => {
   const { toast } = useToast();
+  const { adminProfile } = useAdmin();
   const STORAGE_KEY = 'scc_admin_profile';
   const [form, setForm] = useState({ 
     name: 'Admin User', 
@@ -66,6 +69,7 @@ const AdminProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
+    // Prefill from context/localStorage first for fast paint
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -73,6 +77,21 @@ const AdminProfile = () => {
         setForm(prev => ({ ...prev, ...data }));
       }
     } catch {}
+    // Then fetch from API
+    (async () => {
+      try {
+        const { data } = await api.get('/api/admin/auth/me');
+        if (data?.ok && data?.admin) {
+          setForm(prev => ({
+            ...prev,
+            name: data.admin.name || prev.name,
+            email: data.admin.email || prev.email,
+            phone: data.admin.phone || '',
+            address: data.admin.address || '',
+          }));
+        }
+      } catch {}
+    })();
   }, []);
 
   const onChange = (e) => {
@@ -96,10 +115,27 @@ const AdminProfile = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      // Update profile to API (only allowed fields)
+      if (!adminProfile?.id) throw new Error('missing admin id');
+      await api.patch(`/api/admin/users/${adminProfile.id}`, {
+        name: form.name,
+        phone: form.phone || null,
+        address: form.address || null,
+      });
+      // cache
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        position: form.position,
+        department: form.department,
+        website: form.website,
+        bio: form.bio,
+        timezone: form.timezone,
+        language: form.language,
+        notifications: form.notifications,
+      }));
       
       await Swal.fire({
         title: 'บันทึกสำเร็จ!',
@@ -119,11 +155,7 @@ const AdminProfile = () => {
         description: 'ข้อมูลโปรไฟล์ได้รับการอัปเดตแล้ว'
       });
     } catch (error) {
-      toast({ 
-        title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถบันทึกข้อมูลได้',
-        variant: 'destructive'
-      });
+      toast({ title: 'เกิดข้อผิดพลาด', description: 'ไม่สามารถบันทึกข้อมูลได้', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -169,9 +201,10 @@ const AdminProfile = () => {
       setIsLoading(true);
       
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await api.post('/api/admin/auth/change-password', {
+          currentPassword: passwords.current,
+          newPassword: passwords.next,
+        });
         setPasswords({ current: '', next: '', confirm: '' });
         
         await Swal.fire({
